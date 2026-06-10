@@ -1,0 +1,179 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Validari, constrangeri si mesaje de eroare pentru modulul materials
+
+
+
+
+DESCRIERE:
+----------
+Functionalitatea adauga validari pentru datele primite de endpoint-urile
+modulului materials, constrangeri pentru prevenirea datelor invalide si
+mesaje de eroare clare pentru cazurile de utilizare incorecta.
+
+Modulul materials gestioneaza materialele didactice asociate cursurilor.
+In forma initiala, campurile course_name, title, content si file_url nu aveau
+constrangeri clare, iar aplicatia permitea introducerea unor materiale duplicate
+pentru acelasi curs.
+
+Aceasta modificare rezolva urmatoarele probleme:
+- previne trimiterea campurilor goale sau formate doar din spatii;
+- impune lungimi minime si maxime pentru campurile text;
+- valideaza formatul campului file_url;
+- previne duplicatele pentru aceeasi combinatie course_name + title;
+- returneaza coduri HTTP clare pentru erori;
+- imbunatateste mesajele de eroare pentru resurse inexistente.
+
+
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: materials
+  Modificari:
+  - materials/app/schemas.py:
+    Au fost adaugate validari Pydantic pentru MaterialCreate si MaterialUpdate.
+    Campurile course_name, title si content trebuie sa respecte lungimi minime
+    si maxime. Campul file_url trebuie sa inceapa cu http:// sau https:// daca
+    este completat.
+
+  - materials/app/service.py:
+    A fost adaugata logica pentru detectarea materialelor duplicate. Un material
+    este considerat duplicat daca are acelasi course_name si acelasi title,
+    indiferent de diferentele de litere mari/mici.
+
+  - materials/app/router.py:
+    Au fost adaugate raspunsuri HTTP clare pentru duplicate, resurse inexistente
+    si parametri invalizi. ID-urile materialelor trebuie sa fie numere intregi
+    pozitive.
+
+Modul 2:
+  Modificari:
+  Nu exista alte module afectate direct.
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: POST
+  URL: /materials/
+  Parametri:
+    Body JSON:
+    {
+      "course_name": "Programare Python",
+      "title": "Introducere in FastAPI",
+      "content": "Material despre construirea unui REST API.",
+      "file_url": "https://example.com/fastapi.pdf"
+    }
+  Raspuns:
+    201 Created:
+    {
+      "id": 1,
+      "course_name": "Programare Python",
+      "title": "Introducere in FastAPI",
+      "content": "Material despre construirea unui REST API.",
+      "file_url": "https://example.com/fastapi.pdf"
+    }
+
+    409 Conflict:
+    {
+      "detail": "Material already exists for this course"
+    }
+
+    422 Unprocessable Entity:
+    Apare cand datele nu respecta schema Pydantic.
+
+Endpoint 2:
+  Metoda: PUT
+  URL: /materials/{material_id}
+  Parametri:
+    material_id: int pozitiv
+    Body JSON optional:
+    {
+      "course_name": "Programare Python",
+      "title": "FastAPI actualizat",
+      "content": "Continut actualizat.",
+      "file_url": "https://example.com/updated.pdf"
+    }
+  Raspuns:
+    200 OK:
+    Returneaza materialul actualizat.
+
+    404 Not Found:
+    {
+      "detail": "Material not found"
+    }
+
+    409 Conflict:
+    {
+      "detail": "Material already exists for this course"
+    }
+
+Endpoint 3:
+  Metoda: GET
+  URL: /materials/{material_id}
+  Parametri:
+    material_id: int pozitiv
+  Raspuns:
+    200 OK:
+    Returneaza materialul gasit.
+
+    404 Not Found:
+    {
+      "detail": "Material not found"
+    }
+
+Endpoint 4:
+  Metoda: GET
+  URL: /materials/course/{course_name}
+  Parametri:
+    course_name: string cu minimum 2 caractere
+  Raspuns:
+    200 OK:
+    Returneaza lista materialelor pentru cursul cerut.
+
+    404 Not Found:
+    {
+      "detail": "No materials found for this course"
+    }
+
+Endpoint 5:
+  Metoda: DELETE
+  URL: /materials/{material_id}
+  Parametri:
+    material_id: int pozitiv
+  Raspuns:
+    200 OK:
+    {
+      "message": "Material deleted successfully"
+    }
+
+    404 Not Found:
+    {
+      "detail": "Material not found"
+    }
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Campul course_name este obligatoriu la creare si trebuie sa aiba intre 2 si 100 de caractere.
+2. Campul title este obligatoriu la creare si trebuie sa aiba intre 3 si 150 de caractere.
+3. Campul content este obligatoriu la creare si trebuie sa aiba intre 5 si 5000 de caractere.
+4. Campul file_url este optional, dar daca este completat trebuie sa inceapa cu http:// sau https://.
+5. Campurile text formate doar din spatii sunt respinse.
+6. Nu se pot crea doua materiale cu acelasi course_name si acelasi title.
+7. Nu se poate actualiza un material astfel incat sa devina duplicat.
+8. Endpoint-urile care primesc material_id accepta doar valori intregi pozitive.
+9. Pentru un material inexistent se returneaza 404 Not Found.
+10. Pentru un material duplicat se returneaza 409 Conflict.
+11. Pentru date invalide se returneaza 422 Unprocessable Entity.
+12. Modificarile afecteaza doar modulul materials.
+13. Implementarea foloseste sintaxa Pydantic v2, cu field_validator si model_fields_set, fara validator sau __fields_set__, pentru a evita avertismentele de deprecated API.

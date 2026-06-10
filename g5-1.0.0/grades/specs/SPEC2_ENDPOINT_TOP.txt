@@ -1,0 +1,44 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Top N Studenti dupa medie
+
+DESCRIERE:
+----------
+Acest endpoint va calcula media pentru fiecare student si ii va afisa pe primii n studenti.
+
+
+
+
+MODULE AFECTATE:
+----------------
+
+Modul 1: service.py
+  Modificari: aici se va adauga calcularea mediei
+
+Modul 2: router.py
+  Modificari: aici se va defini ruta
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+
+Endpoint 1:
+  Metoda:  GET
+  URL: /grades/
+  Parametri: 
+		limit (Query, int): Numărul de rezultate returnate (implicit: 10).
+
+    offset (Query, int): Numărul de înregistrări sărite (implicit: 0).
+
+    min_value (Query, float, optional): Filtrează notele mai mari sau egale cu această valoare.
+  Raspuns: Lista de obiecte de tip GradeResponse
+
+Endpoint 2:
+  Metoda: GET
+  URL: /grades/top/{n}
+  Parametri: n (numarul de studenti de inclus in top)
+  Raspuns: O lista de obiecte care contin ID-ul studentului si media calculata (GPA), sortate descrescator

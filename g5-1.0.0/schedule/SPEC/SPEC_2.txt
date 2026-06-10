@@ -1,0 +1,48 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare validari si detectare duplicate - modul schedule
+
+
+DESCRIERE:
+----------
+Adaugarea de constrangeri de validare pe campurile schemelor Pydantic din
+modulul schedule, tratarea cazurilor de duplicate si returnarea de mesaje
+de eroare clare cu coduri HTTP corespunzatoare.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: schemas.py - adaugare validatori pe toate campurile
+              service.py - adaugare logica detectare duplicate
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: POST
+  URL: /schedule/
+  Parametri: body JSON cu campurile schedule
+  Raspuns: 201 la succes, 409 la duplicat, 422 la date invalide
+
+Endpoint 2:
+  Metoda: PUT
+  URL: /schedule/{slot_id}
+  Parametri: slot_id in URL, body JSON cu campurile de actualizat
+  Raspuns: 200 la succes, 409 la duplicat, 422 la date invalide, 404 daca nu exista
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. course_name are minim 3 caractere
+2. professor_id este un numar pozitiv
+3. room nu poate fi string gol
+4. day accepta doar: Luni, Marti, Miercuri, Joi, Vineri
+5. start_time si end_time sunt in format HH:MM cu valori valide
+6. end_time este strict dupa start_time
+7. Nu se poate crea un slot duplicat (acelasi professor_id + room + day + start_time)
+8. Mesajele de eroare sunt in romana si indica clar campul problematic

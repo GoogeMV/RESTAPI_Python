@@ -1,0 +1,30 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA: Validări și Duplicate
+================================================================================
+
+TITLU:
+------
+Implementare validări Pydantic și controlul duplicatelor în modulul Enrollments.
+
+DESCRIERE:
+----------
+Asigură integritatea datelor prin blocarea ID-urilor negative și a numelor de curs prea scurte. 
+Previne înscrierea aceluiași student de mai multe ori la același curs.
+
+MODULE AFECTATE:
+----------------
+Modul Enrollments:
+  - app/schemas.py: Adăugare constrângeri Field.
+  - app/service.py: Implementare verificare duplicate.
+
+ENDPOINT-URI MODIFICATE:
+-------------------------
+Endpoint: POST /enrollments/
+  - Metoda: POST
+  - Răspuns: 201 (Succes), 400 (Duplicat), 422 (Date invalide)
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. ID-urile trebuie să fie > 0.
+2. Numele cursului trebuie să aibă minim 2 caractere.
+3. Eroare 400 dacă perechea (student_id, course_name) există deja.

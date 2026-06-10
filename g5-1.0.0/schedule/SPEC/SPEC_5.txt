@@ -1,0 +1,96 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Scriere teste unitare pentru modulul schedule (Task 5)
+
+
+DESCRIERE:
+----------
+Adaugarea unui set complet de teste unitare pentru modulul schedule, folosind
+pytest si TestClient din FastAPI. Testele acopera toate endpoint-urile, toate
+validarile Pydantic, detectarea duplicatelor, detectarea conflictelor,
+filtrarea, paginarea si noul endpoint GET /schedule/professor/{professor_id}.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: tests/test_router_schedule.py (fisier nou)
+
+
+FISIERE NOI:
+------------
+  tests/test_router_schedule.py — 35 teste unitare pentru modulul schedule
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Teste de creare (CREATE):
+   - POST /schedule/ returneaza 201 si datele corecte
+   - ID-urile sunt incrementale incepand cu 1
+
+2. Teste de citire (READ):
+   - GET /schedule/ returneaza lista goala initial
+   - GET /schedule/{id} returneaza slotul corect
+   - GET /schedule/{id} returneaza 404 pentru ID inexistent
+
+3. Teste de actualizare (UPDATE):
+   - PUT /schedule/{id} modifica doar campurile trimise (partial update)
+   - PUT /schedule/{id} returneaza 404 pentru ID inexistent
+
+4. Teste de stergere (DELETE):
+   - DELETE /schedule/{id} sterge slotul si confirma stergerea
+   - DELETE /schedule/{id} returneaza 404 pentru ID inexistent
+
+5. Teste de validare (VALIDATION):
+   - course_name cu mai putin de 3 caractere -> 422
+   - Zi invalida (ex: Sambata) -> 422
+   - Format timp invalid (ex: 8:00) -> 422
+   - end_time inainte de start_time -> 422
+   - start_time egal cu end_time -> 422
+   - professor_id negativ -> 422
+   - room gol -> 422
+
+6. Teste detectare duplicate:
+   - Acelasi professor_id + room + day + start_time -> 409
+   - Acelasi profesor in alta sala -> 201 (permis)
+   - Aceeasi sala la ore diferite -> 201 (permis)
+
+7. Teste conflicte:
+   - GET /schedule/conflicts returneaza [] fara suprapuneri
+   - GET /schedule/conflicts detecteaza suprapuneri in aceeasi sala
+   - Suprapunere de timp in sali diferite nu este conflict
+
+8. Teste GET /schedule/professor/{id}:
+   - Returneaza sloturile corecte ale profesorului
+   - Returneaza [] daca profesorul nu are sloturi
+   - Returneaza toate sloturile (nu limitat la 10)
+
+9. Teste filtrare:
+   - ?day=Luni returneaza doar sloturile de luni
+   - ?room=A101 returneaza doar sloturile din sala A101
+   - ?professor_id=3 returneaza doar sloturile profesorului 3
+
+10. Teste paginare:
+    - Limita implicita este 10
+    - ?limit=5 returneaza cel mult 5 rezultate
+    - ?limit=5&offset=10 returneaza urmatoarele 5
+    - Offset dincolo de total returneaza lista goala
+    - limit=0 -> 422
+    - limit>100 -> 422
+    - offset negativ -> 422
+
+INFRASTRUCTURA:
+---------------
+- Fixture autouse reset_db: curata schedule_db si reseteaza next_id=1
+  inainte de fiecare test (izolare completa intre teste)
+- Helper _payload(): construieste rapid un payload valid cu valori implicite
+- Toate testele trec ruff format si ruff check
+
+
+----------------
+24 Mai 2026
+Branch: feature/schedule-tests

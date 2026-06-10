@@ -1,0 +1,51 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Actualizare README complet pentru modulul schedule
+
+
+DESCRIERE:
+----------
+README-ul initial al modulului schedule continea doar documentarea de baza
+(Task 1). Aceasta specificatie vizeaza completarea lui cu toate functionalitatile
+adaugate ulterior: validari, filtrare, paginare, detectare duplicate,
+detectare conflicte, endpoint nou si instructiuni de rulare teste.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: schedule/README.txt — rescriere completa
+
+
+CONTINUT NOU ADAUGAT:
+---------------------
+1. Sectiune filtrare si paginare — tabel cu toti parametrii GET /schedule/
+2. Sectiune validari — tabel cu regulile pentru fiecare camp
+3. Sectiune detectare duplicate — explicatie comportament 409
+4. Sectiune detectare conflicte — explicatie cu exemplu JSON
+5. Sectiune exemple cereri/raspunsuri:
+   - POST /schedule/ (creare slot)
+   - GET /schedule/professor/{id} (endpoint nou)
+   - PUT /schedule/{id} (actualizare partiala)
+6. Tabel coduri HTTP returnate
+7. Sectiune cum se ruleaza testele
+8. Sectiune structura completa a modulului (fisiere + SPEC-uri)
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. README documenteaza toti parametrii de filtrare si paginare
+2. README documenteaza toate validarile Pydantic
+3. README contine exemple de cereri si raspunsuri JSON reale
+4. README listeaza toate endpoint-urile inclusiv GET /professor/{id}
+5. README explica cum se ruleaza testele
+6. README reflecta structura actuala a modulului
+
+
+----------------
+24 Mai 2026
+Branch: feature/schedule-readme

@@ -1,0 +1,95 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare teste unitare pentru modulul auth
+
+
+
+
+DESCRIERE:
+----------
+In stadiul actual, modulul auth nu dispune de teste unitare.
+Propunerea aceasta vizeaza implementarea unui set de teste care sa valide
+functionalitatea existenta a endpoint-urilor de autentificare, inclusiv
+operatiile de inregistrare, logare, consultare profil si gestionare rol,
+fara a introduce in aceasta faza modificari asupra API-ului. Ulterior, pe
+masura ce modulul auth a primit si un endpoint de listare utilizatori, setul
+de teste se extinde cu verificari pentru filtrare si paginare.
+
+
+
+MODULE AFECTATE:
+----------------
+Nu exista module afectate cu exceptia directorului tests din folder-ul root, dupa cum urmeaza:
+  Modificari:
+    - Implementare fisier tests/auth_test_router.py continand testele unitare
+      - Extindere cu cazuri pentru GET /auth/users, fara a afecta celelalte module
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Nu sunt adaugate sau modificate endpoint-uri. Testarea se concentreaza
+pe endpoint-urile deja existente:
+- POST /auth/register
+- POST /auth/login
+- GET /auth/me
+- PUT /auth/roles
+- GET /auth/verify
+
+Endpoint suplimentar acoperit de testare:
+- GET /auth/users
+
+Fiecare endpoint va fi testat cu:
+- Cazuri cu intrari valide
+- Cazuri cu identificatori inexistenti
+- Verificare comportament la parametri invalizi
+- Pentru /auth/users: listare implicita, filtrare dupa nume, filtrare dupa rol,
+  paginare cu limit si offset, rezultat gol si validare pentru limit invalid
+
+
+
+
+SPECIFICATII DE TEST:
+---------------------
+
+1. Testare register:
+   - Inregistrare cu parametrii completi si valizi
+   - Comportament la tentativa de re-inregistrare cu acelasi utilizator
+
+2. Testare login:
+   - Autentificare reusita cu credentiale corecte
+   - Logare esuata cu parola incorecta
+   - Logare esuata cu utilizator neexistent
+
+3. Testare me:
+   - Consultare profil pentru utilizator existent
+   - Comportament la cererea pentru utilizator inexistent
+
+4. Testare role:
+   - Schimbare rol pentru utilizator prezent in sistem
+   - Tentativa modificare rol pentru utilizator absent
+
+5. Testare verify:
+   - Verificare pozitiva pentru utilizator valid
+   - Verificare pentru identificator inexistent
+
+6. Testare listare utilizatori:
+   - Returnarea listei implicite de utilizatori cu date fara parola
+   - Filtrare partiala dupa username
+   - Filtrare dupa rol combinata cu paginare
+   - Comportament corect la rezultat vid
+   - Validare pentru parametru limit invalid
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Fisierul de testare este creat cu componentele necesare.
+2. Minim 5 functii de test sunt implementate.
+3. Utilizarea pytest si TestClient din modulul FastAPI.
+4. Executie locala reusita: pytest tests/test_router_auth.py -v fara avertismente sau erori.
+5. Acoperire de functionalitate: toate cele cinci endpoint-uri initiale plus endpoint-ul nou /auth/users trebuie testate.

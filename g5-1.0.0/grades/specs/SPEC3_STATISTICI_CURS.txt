@@ -1,0 +1,56 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adăugare Endpoint pentru Statistici Academice per Curs (Module Grades)
+
+
+DESCRIERE:
+----------
+Această funcționalitate adaugă un nou endpoint care permite profesorilor și 
+administratorilor să vizualizeze performanța generală a studenților la un anumit 
+curs. Endpoint-ul va calcula automat media aritmetică a notelor, cea mai mare 
+notă (max), cea mai mică notă (min) și numărul total de note acordate. 
+
+Problema rezolvată: În prezent, pentru a afla starea unui curs, utilizatorul 
+trebuie să descarce manual toate notele și să facă calculele. Acest endpoint 
+centralizează și automatizează generarea de metrici utile direct pe server.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: grades (Modulul propriu)
+  Modificari: 
+  - schemas.py: Adăugarea schemei CourseStatsResponse pentru validarea output-ului.
+  - service.py: Adăugarea funcției get_course_stats() care filtrează baza de date în memorie și calculează min/max/media.
+  - router.py: Expunerea rutei GET /grades/stats/{course_name} și tratarea erorilor (404 dacă cursul nu are note).
+
+Modul 2: reports (Modul consumator secundar)
+  Modificari: Nu sunt necesare modificări imediate, dar acest endpoint va putea fi 
+  apelat de colegul care implementează rapoartele globale pentru secțiunea "distribuție note".
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /grades/stats/{course_name}
+  Parametri: course_name (Path Parameter, str) - Numele cursului analizat.
+  Raspuns: JSON Object (200 OK)
+    {
+      "course_name": "Programare Python",
+      "average_grade": 8.45,
+      "max_grade": 10.0,
+      "min_grade": 5.5,
+      "total_grades": 12
+    }
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Dacă cursul există și are note introduse, serverul trebuie să returneze status 200 OK și un obiect JSON cu cele 5 câmpuri matematice corecte (media rotunjită la 2 zecimale).
+2. Căutarea cursului trebuie să ignore spațiile libere accidentale de la început/final (strip) și să fie case-insensitive (să funcționeze la fel pentru "mate" și "Mate").
+3. Dacă nu există nicio notă înregistrată pentru cursul solicitat, serverul trebuie să returneze status 404 Not Found cu un mesaj de eroare (ex: "No grades found for course 'X'").
+4. Funcționalitatea trebuie acoperită de minim 2 teste unitare în test_router.py (unul pentru caz de succes și unul pentru caz de 404).

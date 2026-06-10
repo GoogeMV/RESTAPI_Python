@@ -1,0 +1,144 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Paginare, filtrare dupa curs si cautare pentru modulul materials
+
+
+
+
+DESCRIERE:
+----------
+Functionalitatea adauga parametri de paginare pentru endpoint-urile de listare
+din modulul materials si introduce cautare dupa cuvant-cheie in materialele
+didactice.
+
+Inainte de aceasta modificare, endpoint-ul de listare returna toate materialele
+existente, fara limitare si fara offset. De asemenea, filtrarea dupa curs nu
+avea suport pentru paginare, iar modulul nu avea un endpoint dedicat pentru
+cautarea materialelor dupa continut.
+
+Aceasta modificare adauga:
+- paginare pentru GET /materials/ folosind parametrii limit si offset;
+- paginare pentru GET /materials/course/{course_name};
+- endpoint nou GET /materials/search?q=keyword;
+- cautare case-insensitive in course_name, title si content;
+- validarea parametrilor limit, offset si q;
+- mesaje clare cand nu exista rezultate pentru cautare sau filtrare.
+
+
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: materials
+  Modificari:
+  - materials/app/service.py:
+    A fost adaugata functia helper _paginate pentru aplicarea limit si offset.
+    Functia get_all_materials accepta acum parametrii limit si offset.
+    Functia get_by_course accepta acum parametrii limit si offset.
+    A fost adaugata functia search_materials pentru cautare dupa course_name,
+    title si content.
+
+  - materials/app/router.py:
+    Endpoint-ul GET /materials/ accepta acum query parameters limit si offset.
+    Endpoint-ul GET /materials/course/{course_name} accepta acum limit si offset.
+    A fost adaugat endpoint-ul GET /materials/search, care primeste parametrul
+    q pentru cautare, impreuna cu limit si offset.
+
+Modul 2:
+  Modificari:
+  Nu exista alte module afectate direct.
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /materials/
+  Parametri:
+    limit: int optional, implicit 10, minim 1, maxim 100
+    offset: int optional, implicit 0, minim 0
+  Raspuns:
+    200 OK:
+    [
+      {
+        "id": 1,
+        "course_name": "Programare Python",
+        "title": "Introducere in FastAPI",
+        "content": "Material despre construirea unui REST API.",
+        "file_url": "https://example.com/fastapi.pdf"
+      }
+    ]
+
+Endpoint 2:
+  Metoda: GET
+  URL: /materials/course/{course_name}
+  Parametri:
+    course_name: string, minimum 2 caractere
+    limit: int optional, implicit 10, minim 1, maxim 100
+    offset: int optional, implicit 0, minim 0
+  Raspuns:
+    200 OK:
+    Returneaza lista materialelor asociate cursului cerut, paginata.
+
+    404 Not Found:
+    {
+      "detail": "No materials found for this course"
+    }
+
+Endpoint 3:
+  Metoda: GET
+  URL: /materials/search
+  Parametri:
+    q: string obligatoriu, minimum 2 caractere, maximum 100 caractere
+    limit: int optional, implicit 10, minim 1, maxim 100
+    offset: int optional, implicit 0, minim 0
+  Exemplu:
+    GET /materials/search?q=algoritmi&limit=10&offset=0
+
+  Raspuns:
+    200 OK:
+    [
+      {
+        "id": 1,
+        "course_name": "Algoritmi si structuri de date",
+        "title": "Algoritmi de sortare",
+        "content": "Material despre bubble sort, merge sort si quick sort.",
+        "file_url": null
+      }
+    ]
+
+    404 Not Found:
+    {
+      "detail": "No materials found for this search query"
+    }
+
+    422 Unprocessable Entity:
+    Apare cand q este prea scurt, limit este mai mic decat 1,
+    limit este mai mare decat 100 sau offset este negativ.
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Endpoint-ul GET /materials/ accepta parametrii limit si offset.
+2. Parametrul limit are valoarea implicita 10.
+3. Parametrul limit accepta valori intre 1 si 100.
+4. Parametrul offset are valoarea implicita 0.
+5. Parametrul offset nu poate fi negativ.
+6. Endpoint-ul GET /materials/course/{course_name} accepta limit si offset.
+7. Endpoint-ul GET /materials/search exista si poate fi apelat cu parametrul q.
+8. Parametrul q este obligatoriu pentru cautare.
+9. Parametrul q trebuie sa aiba intre 2 si 100 de caractere.
+10. Cautarea se face case-insensitive.
+11. Cautarea verifica valorile din course_name, title si content.
+12. Daca nu exista rezultate pentru cautare, API-ul returneaza 404 Not Found.
+13. Daca nu exista rezultate pentru filtrarea dupa curs, API-ul returneaza 404 Not Found.
+14. Pentru parametri invalizi, API-ul returneaza 422 Unprocessable Entity.
+15. Modificarile afecteaza doar modulul materials.

@@ -1,0 +1,143 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Gestionare anunturi si comunicari
+
+
+DESCRIERE:
+----------
+Adauga un modul pentru gestionarea anunturilor din platforma educationala.
+Functionalitatea permite crearea, afisarea, modificarea si stergerea
+anunturilor, precum si filtrarea acestora dupa audienta tinta, autor sau
+cuvinte cheie.
+
+Modulul este util pentru comunicari administrative, mesaje catre studenti,
+profesori sau catre toti utilizatorii platformei. Fiecare anunt contine un
+titlu, continut, autor, audienta tinta si un status intern.
+
+Datele trimise pentru creare si actualizare sunt validate prin scheme
+Pydantic, astfel incat campurile obligatorii sa respecte lungimi minime
+si maxime rezonabile.
+
+Anunturile noi create pornesc cu statusul "active". Un anunt poate fi arhivat
+fara sa fie sters din memoria aplicatiei. Modulul mai expune un sumar simplu
+pentru numarul de anunturi, audiente, autori si statusuri, util pentru
+verificari rapide in interfata sau in teste.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: announcements
+  Modificari:
+    - Adaugare functionalitate CRUD completa pentru anunturi
+    - Adaugare validari Pydantic pentru title, content, author si target_audience
+    - Adaugare endpoint pentru filtrarea anunturilor dupa audienta
+    - Adaugare status pentru anunturi si endpoint de arhivare
+    - Adaugare endpoint de sumar pentru anunturi
+    - Adaugare endpoint separat pentru cautare dupa autor
+    - Adaugare endpoint separat pentru cautare in titlu si continut
+    - Adaugare endpoint pentru stergerea anunturilor dupa audienta
+    - Folosirea stratului service pentru logica aplicatiei
+    - Stocarea datelor in memorie prin announcements/app/data.py
+    - Adaugare teste unitare pentru CRUD, cazuri 404, validari 422 si endpoint-urile noi
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: POST
+  URL: /announcements/
+Parametri: JSON body cu title, content, author, target_audience
+           Campurile sunt validate prin schema AnnouncementCreate
+Raspuns: anuntul creat, incluzand id-ul generat automat, sau HTTP 422 pentru date invalide
+
+Endpoint 2:
+  Metoda: GET
+  URL: /announcements/
+  Parametri: niciunul
+  Raspuns: lista tuturor anunturilor existente
+
+Endpoint 3:
+  Metoda: GET
+  URL: /announcements/audience/{audience}
+  Parametri: audience in URL
+  Raspuns: lista anunturilor care au target_audience egal cu audience
+
+Endpoint 4:
+  Metoda: GET
+  URL: /announcements/{ann_id}
+  Parametri: ann_id in URL
+  Raspuns: anuntul cu id-ul cerut sau eroare 404 daca nu exista
+
+Endpoint 5:
+  Metoda: PUT
+  URL: /announcements/{ann_id}
+  Parametri: ann_id in URL si JSON body optional cu title, content, author, target_audience
+           Campurile trimise sunt validate prin schema AnnouncementUpdate
+  Raspuns: anuntul modificat, eroare 404 daca nu exista sau HTTP 422 pentru date invalide
+
+Endpoint 6:
+  Metoda: DELETE
+  URL: /announcements/{ann_id}
+  Parametri: ann_id in URL
+  Raspuns: mesaj de confirmare pentru stergere sau eroare 404 daca nu exista
+
+Endpoint 7:
+  Metoda: POST
+  URL: /announcements/{ann_id}/archive
+  Parametri: ann_id in URL
+  Raspuns: anuntul actualizat, cu status "archived", sau eroare 404 daca nu exista
+  Observatie: anuntul nu este sters, ci ramane in memoria modulului
+
+Endpoint 8:
+  Metoda: GET
+  URL: /announcements/stats/summary
+  Parametri: niciunul
+  Raspuns: un dictionar cu total, audiences, authors, archived si active
+  Observatie: audiences si authors sunt calculate fara diferentiere intre litere mari si mici
+
+Endpoint 9:
+  Metoda: GET
+  URL: /announcements/authors/{author}
+  Parametri: author in URL
+  Raspuns: lista anunturilor al caror autor contine valoarea trimisa
+  Observatie: cautarea este partiala si nu tine cont de litere mari sau mici
+
+Endpoint 10:
+  Metoda: GET
+  URL: /announcements/search/{keyword}
+  Parametri: keyword in URL
+  Raspuns: lista anunturilor in care keyword apare in titlu sau continut
+  Observatie: cautarea nu tine cont de litere mari sau mici si returneaza lista goala daca nu exista rezultate
+
+Endpoint 11:
+  Metoda: DELETE
+  URL: /announcements/audience/{audience}
+  Parametri: audience in URL
+  Raspuns: {"message": "Announcements deleted", "deleted_count": <numar>}
+  Observatie: sterge toate anunturile pentru audienta ceruta, fara diferentiere intre litere mari si mici
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. POST /announcements/ creeaza un anunt nou si returneaza HTTP 201
+2. GET /announcements/ returneaza HTTP 200 si lista tuturor anunturilor
+3. GET /announcements/audience/{audience} filtreaza corect anunturile dupa audienta
+4. GET /announcements/{ann_id} returneaza anuntul cerut daca acesta exista
+5. PUT /announcements/{ann_id} modifica doar campurile trimise in request
+6. DELETE /announcements/{ann_id} sterge anuntul cerut si returneaza mesaj de confirmare
+7. Pentru id-uri inexistente, endpoint-urile GET, PUT si DELETE returneaza HTTP 404
+8. Request-urile invalide returneaza eroare de validare HTTP 422, inclusiv pentru campuri prea scurte sau prea lungi
+9. Raspunsurile sunt JSON valid si respecta structura documentata
+10. Modulul announcements nu depinde de alte module ale proiectului
+11. POST /announcements/{ann_id}/archive seteaza statusul anuntului la "archived" si returneaza anuntul actualizat
+12. Anunturile create prin POST /announcements/ au statusul implicit "active"
+13. GET /announcements/stats/summary returneaza corect totalul, numarul de audiente, numarul de autori si numarul de anunturi active/arhivate
+14. GET /announcements/authors/{author} face potrivire partiala si case-insensitive dupa autor
+15. GET /announcements/search/{keyword} cauta in title si content si returneaza lista goala daca nu exista rezultate
+16. DELETE /announcements/audience/{audience} sterge toate anunturile pentru audienta ceruta si returneaza deleted_count
+17. DELETE /announcements/audience/{audience} returneaza HTTP 404 daca nu exista anunturi pentru audienta ceruta
+18. Testele unitare acopera creare, listare, citire, actualizare, stergere, filtrare dupa audienta, cazuri 404, validari 422 si endpoint-urile noi

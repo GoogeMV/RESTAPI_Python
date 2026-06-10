@@ -1,0 +1,134 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Endpoint pentru listarea studentilor inscrisi la cursurile unui profesor
+
+
+
+
+DESCRIERE:
+----------
+Acest endpoint expune relatia dintre un profesor 
+si studentii inscrisi la cursurile predate de acesta:
+GET /professors/{id}/students.
+
+In prezent, modulul professors permite doar operatii CRUD pe profesori si
+listarea cursurilor predate de un profesor (GET /{id}/courses). Nu exista
+nicio modalitate de a raspunde la intrebarea "care sunt studentii unui
+profesor", desi datele exista in sistem.
+
+Relatia profesor-student este indirecta in arhitectura curenta: legatura
+trece prin tabela enrollments. Un student care urmeaza mai multe cursuri
+ale aceluiasi profesor trebuie sa apara o singura data in raspuns.
+
+
+
+
+MODULE AFECTATE:
+----------------
+
+Modulul 1: professors
+  Modificari:
+    - service.py: functie noua get_professor_students(professor_id, limit, offset)
+      care identifica studentii prin enrollments si returneaza detaliile lor
+      din students. Aplicarea paginarii dupa sortare deterministica pe id.
+      Foloseste importuri tarzii pentru enrollments si students (in interiorul
+      functiei), pentru a permite pornirea modulului chiar daca dependentele
+      lipsesc; in acest caz functia returneaza None ca semnal pentru router.
+    - router.py: endpoint nou GET /{id}/students cu parametri Query pentru
+      paginare (limit, offset). Verifica intai existenta profesorului (404
+      daca lipseste), apoi cheama service-ul si transforma None in raspuns
+      503.
+
+Modulul 2: enrollments
+  Modificari:
+    - Niciuna. Modulul este consumat read-only, prin importul
+      enrollments.app.data.enrollments_db. Se presupune ca inregistrarile
+      contin campurile student_id si professor_id (deja prezente conform
+      README-ului de proiect).
+
+Modulul 3: students
+  Modificari:
+    - Niciuna. Modulul este consumat read-only, prin importul
+      students.app.data.students_db. Se presupune ca inregistrarile contin
+      campurile id, name, email si alte detalii standard.
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+
+Endpoint 1:
+  Metoda: GET
+  URL: /professors/{professor_id}/students
+  Parametri:
+    - professor_id (path, int, obligatoriu): ID-ul profesorului
+    - limit (query, int, optional, default 10, intre 1 si 100): numarul
+      maxim de studenti returnati intr-o pagina
+    - offset (query, int, optional, default 0, minim 0): numarul de
+      studenti sariti inainte de pagina curenta
+  Raspuns:
+    - 200 OK: lista de obiecte student (in forma dictionarelor din
+      students.app.data.students_db), deduplicate dupa id si sortate
+      crescator dupa id. Lista poate fi goala daca profesorul exista
+      dar nu are studenti inscrisi.
+    - 404 Not Found: profesorul cu id-ul specificat nu exista.
+      Body: {"detail": "Professor not found"}
+    - 422 Unprocessable Entity: limit sau offset in afara intervalelor
+      permise (limit < 1, limit > 100, offset < 0). Body generat automat
+      de FastAPI.
+    - 503 Service Unavailable: modulul enrollments sau modulul students
+      nu este disponibil la runtime.
+      Body: {"detail": "Required modules (enrollments, students) not available"}
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+
+1. GET /professors/{id}/students returneaza 200 si o lista de studenti
+   pentru un profesor care are studenti inscrisi la cursurile sale.
+   Fiecare element din lista contine detaliile complete ale studentului
+   (asa cum sunt stocate in students.app.data.students_db).
+
+2. Un student inscris la mai multe cursuri ale aceluiasi profesor
+   apare o singura data in raspuns (deduplicare dupa student_id).
+
+3. Ordinea studentilor in raspuns este deterministica intre apeluri
+   (sortare crescatoare dupa id), astfel incat paginarea sa fie stabila.
+
+4. GET /professors/{id}/students returneaza 200 cu lista goala daca
+   profesorul exista dar nu are niciun student inscris.
+
+5. GET /professors/{id}/students returneaza 404 daca profesorul cu
+   id-ul respectiv nu exista. Verificarea profesorului are loc inainte
+   de orice tentativa de a accesa enrollments sau students.
+
+6. Parametrii de paginare limit si offset respecta aceleasi reguli si
+   default-uri ca pe celelalte endpoint-uri de listare ale modulului:
+   default limit=10, max limit=100, min limit=1, min offset=0. Valorile
+   in afara acestor intervale produc 422.
+
+7. Daca modulul enrollments sau modulul students nu este disponibil la
+   runtime (ImportError), endpoint-ul returneaza 503 cu un mesaj clar.
+   Modulul professors trebuie sa porneasca corect chiar in absenta acestor
+   dependente (importurile sunt tarzii, in interiorul functiei de service).
+
+8. Daca un enrollment refera un student_id care nu mai exista in
+   students_db (date inconsistente intre module), studentul este omis
+   silentios din raspuns, fara a provoca eroare.
+
+9. Endpoint-ul este acoperit de minim 5 teste noi in
+   professors/tests/test_router.py: happy path, deduplicare, lista goala,
+   404 pentru profesor inexistent, paginare, 422 pentru parametri invalizi.
+
+10. README-ul modulului professors este actualizat pentru a reflecta noua
+    dependenta de students, noul endpoint si comportamentul sau cross-modul.
+
+11. Pipeline-ul CI/CD este verde dupa implementare (toate testele existente
+    continua sa treaca).

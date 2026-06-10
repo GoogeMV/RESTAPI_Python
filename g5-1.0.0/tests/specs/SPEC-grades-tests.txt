@@ -1,0 +1,95 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare teste unitare pentru modulul grades
+
+
+DESCRIERE:
+----------
+In stadiul actual, modulul grades nu dispune de o suita completa de teste unitare.
+Propunerea aceasta vizeaza implementarea unui set de teste care sa valideze
+functionalitatea existenta a endpoint-urilor de gestionare a notelor, inclusiv
+operatiile CRUD standard, calculul mediei (GPA) si situatia scolara (transcript).
+Ulterior, pe masura ce modulul a fost imbunatatit cu functionalitati de validare, 
+paginare, filtrare si statistici avansate, setul de teste se extinde pentru a 
+acoperi noile comportamente ale API-ului, asigurand stabilitatea codului in 
+pipeline-ul CI/CD.
+
+
+
+MODULE AFECTATE:
+----------------
+Nu exista module afectate din punct de vedere al functionalitatii, ci doar extinderea 
+directorului de teste din interiorul modulului propriu:
+  Modificari:
+    - Implementare fisier grades/tests/test_router.py continand testele unitare.
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Nu sunt adaugate sau modificate endpoint-uri prin acest SPEC (ele fiind deja create). 
+Testarea se concentreaza pe acoperirea integrala a tuturor rutele din modul:
+- POST /grades/
+- GET /grades/
+- GET /grades/{grade_id}
+- PUT /grades/{grade_id}
+- DELETE /grades/{grade_id}
+- GET /grades/transcript/{student_id}
+- GET /grades/gpa/{student_id}
+- GET /grades/top/{n}
+- GET /grades/stats/{course_name}
+
+Fiecare endpoint va fi testat cu:
+- Cazuri cu intrari valide
+- Cazuri de eroare pentru resurse sau identificatori inexistenti (404 Not Found)
+- Validari stricte pentru parametri invalizi conform schemelor Pydantic (422 Unprocessable Entity)
+- Validarea algoritmilor de calcul matematic (medie ponderata, min, max, sortare descrescatoare)
+
+
+
+
+SPECIFICATII DE TEST:
+---------------------
+
+1. Testare create_grade (POST /grades/):
+   - Creare nota cu parametrii completi si valizi (status 201).
+   - Validare eroare la introducerea unei note invalide (ex: valoare 12.0 sau -2.0, status 422).
+   - Validare eroare la nume de curs prea scurt (status 422).
+
+2. Testare list_grades (GET /grades/):
+   - Returnarea listei implicite de note (status 200).
+   - Verificare paginare folosind parametrii limit si offset.
+   - Verificare filtrare dupa nota minima folosind min_value.
+
+3. Testare get_grade & update_grade (GET, PUT /grades/{grade_id}):
+   - Consultare si modificare cu succes pentru o nota existenta (status 200).
+   - Comportament corect (status 404) la cereri sau modificari pe un ID inexistent.
+   - Validarea restrictiilor de valori (Field) si in cazul operatiei de update.
+
+4. Testare delete_grade (DELETE /grades/{grade_id}):
+   - Stergerea cu succes a unei note existente (status 200).
+   - Incercarea de a sterge o nota absenta din sistem (status 404).
+
+5. Testare situatii studenti (GET /transcript/{student_id} & /gpa/{student_id}):
+   - Extragerea corecta a listei de note pentru un student specific.
+   - Calcularea si rotunjirea corecta a mediei generale (GPA).
+   - Tratarea cazului in care studentul nu are note in sistem (intoarcere GPA 0.0 si mesaj).
+
+6. Testare top_students (GET /grades/top/{n}):
+   - Agregarea corecta a notelor per student si returnarea clasamentului sortat descrescator.
+   - Verificare limitare lista la cele "n" rezultate cerute.
+
+7. Testare statistici curs (GET /grades/stats/{course_name}):
+   - Calculul matematic corect pentru min, max, average_grade si total_grades pe un curs existent.
+   - Verificarea comportamentului case-insensitive si eliminarea spatiilor (strip) pentru numele cursului.
+   - Comportament in caz de esec: returnare status 404 daca cursul nu are nicio nota salvata.
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Fisierul de testare tests/test_router_grades.py este creat in structura corecta a modulului.
+2. Sunt implementate cazuri de test care acopera atat operatiile CRUD elementare, cat si noile endpoint-uri de statistici si top.
+3. Utilizarea obligatorie a framework-ului pytest si a utilitarului TestClient din FastAPI.

@@ -1,0 +1,51 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Documentatie initiala modul schedule (Task 1 - Intelegerea codului)
+
+
+DESCRIERE:
+----------
+Documentarea modulului schedule ca parte a primului task din specificatiile
+proiectului. S-a analizat codul existent, s-au testat toate endpoint-urile
+prin Swagger UI, s-au identificat dependentele modulului si s-a documentat
+fluxul complet al unei cereri HTTP prin straturile aplicatiei.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: Actualizare README.md cu descrierea modulului, dependentele
+              intre module, lista endpoint-urilor si fluxul unei cereri HTTP
+              (router.py -> service.py -> data.py -> schemas.py -> Response)
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Niciun endpoint nou sau modificat in acest task.
+Task-ul acopera doar documentarea endpoint-urilor existente:
+  - GET    /schedule/
+  - POST   /schedule/
+  - GET    /schedule/{id}
+  - PUT    /schedule/{id}
+  - DELETE /schedule/{id}
+  - GET    /schedule/conflicts
+  - GET    /schedule/?room=...
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. README.md contine descrierea modulului si a scopului sau
+2. README.md documenteaza dependentele (ce depinde de schedule si de ce depinde schedule)
+3. README.md explica fluxul unei cereri HTTP cu exemple de cod din fiecare strat
+4. README.md listeaza toate endpoint-urile disponibile cu metoda si descriere
+5. Toate endpoint-urile existente au fost testate manual prin Swagger UI
+
+
+----------------
+5 Mai 2026
+Finalizat README.txt
+

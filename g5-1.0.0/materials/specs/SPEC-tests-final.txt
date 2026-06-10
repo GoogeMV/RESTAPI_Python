@@ -1,0 +1,79 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Teste unitare si export OpenAPI pentru modulul materials
+
+
+
+
+DESCRIERE:
+----------
+Aceasta functionalitate finalizeaza modulul materials prin adaugarea testelor
+unitare si pregatirea exportului schemei OpenAPI.
+
+Modulul materials gestioneaza materialele didactice asociate cursurilor.
+Functionalitatea existenta include CRUD complet, validari, tratarea duplicatelor,
+paginare si filtrare dupa curs.
+
+Aceasta etapa adauga:
+- teste unitare folosind pytest si TestClient din FastAPI;
+- acoperire pentru creare, citire, actualizare, stergere si cazuri de eroare;
+- generarea fisierului materials/openapi.json din aplicatia FastAPI.
+
+
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: materials
+  Modificari:
+  - ./tests/test_router_materials.py:
+    A fost adaugat un set de teste unitare pentru endpoint-urile modulului.
+    Testele folosesc FastAPI TestClient si reseteaza stocarea in memorie
+    inaintea fiecarui test.
+
+  - materials/README.md:
+    Documentatia modulului a fost completata cu descrierea endpoint-urilor,
+    exemple de cereri si raspunsuri, dependentele modulului si instructiuni
+    pentru rularea testelor.
+
+  - materials/openapi.json:
+    Schema OpenAPI este generata din aplicatia FastAPI si salvata in radacina
+    modulului materials.
+
+Modul 2:
+  Modificari:
+  Nu exista alte module afectate direct.
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+  Nu exista endpoint-uri afectate de aceasta data.
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Exista fisierul ./tests/test_router.py.
+2. Testele folosesc pytest si TestClient din FastAPI.
+3. Exista test pentru creare material.
+4. Exista test pentru citire material dupa ID.
+5. Exista test pentru listare materiale cu paginare.
+6. Exista test pentru actualizare material.
+7. Exista test pentru stergere material.
+8. Exista cel putin un test pentru caz de eroare 404.
+9. Exista test pentru duplicat cu raspuns 409 Conflict.
+10. Exista test pentru date invalide cu raspuns 422 Unprocessable Entity.
+11. Exista test pentru endpoint-ul GET /materials/search.
+12. Exista test pentru filtrare dupa curs.
+13. Stocarea in memorie este resetata inaintea fiecarui test.
+14. Schema OpenAPI este exportata in materials/openapi.json.
+15. README.md contine descrierea modulului si a endpoint-urilor.
+16. README.md contine exemple de cereri si raspunsuri.
+17. README.md contine dependentele modulului.
+18. README.md contine instructiuni pentru rularea testelor.
+19. Modificarile afecteaza doar modulul materials, cu exceptia rularii aplicatiei principale pentru generarea schemei OpenAPI.

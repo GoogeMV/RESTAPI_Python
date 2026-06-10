@@ -1,0 +1,86 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Filtrare si paginare pentru lista de utilizatori din modulul auth
+
+
+
+DESCRIERE:
+----------
+Modulul auth nu expune in prezent un endpoint de listare, doar operatii
+punctuale pe utilizatori individuali. Pentru a acoperi cerinta de filtrare si
+paginare strict in cadrul modulului auth, voi adauga un endpoint nou de
+listare administrata a utilizatorilor, care returneaza subseturi de date dupa
+limit, offset si filtre optionale.
+
+Endpoint-ul va permite:
+- listarea paginata a utilizatorilor din memoria auth
+- filtrare dupa nume de utilizator prin cautare partiala
+- filtrare dupa rol
+- combinarea filtrelor cu paginare in acelasi request
+
+Scopul este sa existe in auth o functionalitate clara de listare care respecta
+formatul cerut de tema, fara a modifica modulele students, grades sau materials.
+
+
+
+MODULE AFECTATE:
+----------------
+Modulul auth:
+  Modificari:
+    - auth/router.py: adaugarea unui endpoint nou de listare utilizatori
+    - auth/schemas.py: definirea unui model de raspuns pentru lista
+    - auth/data.py: reutilizarea colectiei users_db pentru filtrare si
+      sortare stabila
+
+Nu sunt necesare modificari in alte module.
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /auth/users
+  Parametri:
+    - limit: int, optional, valoare implicita 10
+    - offset: int, optional, valoare implicita 0
+    - name: str, optional, filtru partial case-insensitive pe username
+    - role: str, optional, filtru exact pe rol
+  Raspuns:
+    - 200 OK
+    - body JSON cu structura:
+      {
+        "items": [
+          {"id": 1, "username": "ion", "role": "student"}
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      }
+
+Endpoint 2:
+  Metoda: GET
+  URL: /auth/users/{user_id}
+  Parametri:
+    - user_id: int, path parameter
+  Raspuns:
+    - ramane neschimbat daca este folosit in mod existent; nu este necesar
+      pentru aceasta cerinta, dar lista va reutiliza aceleasi date din memorie
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Endpoint-ul GET /auth/users returneaza utilizatorii din memoria auth in
+   forma paginata si stabila, fara a expune parolele.
+2. Parametrii limit si offset controleaza corect numarul de rezultate si
+   pozitia de start, iar filtrarea dupa name si role poate fi folosita
+   impreuna cu paginarea.
+3. Cererea continua sa functioneze corect si atunci cand nu exista rezultate,
+   returnand o lista vida si total 0, fara erori.
+4. Implementarea ramane izolata in modulul auth si nu cere modificari in alte
+   module ale aplicatiei.

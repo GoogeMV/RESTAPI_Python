@@ -1,0 +1,75 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare endpoint GET /schedule/professor/{professor_id} - modul schedule
+
+
+DESCRIERE:
+----------
+Adaugarea unui endpoint nou care returneaza toate sloturile din orar ale unui
+profesor identificat prin professor_id. Endpoint-ul necesita intelegerea
+relatiei dintre modulul schedule si modulul professors, chiar daca modulul
+schedule ramane autonom (nu importa direct date din professors).
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: app/service.py - adaugare functie get_slots_by_professor()
+              app/router.py  - adaugare ruta GET /professor/{professor_id}
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /schedule/professor/{professor_id}
+  Parametri: professor_id (int, in URL) - ID-ul profesorului
+  Raspuns: 200 cu lista (posibil goala) de sloturi ale profesorului
+  Erori: 422 daca professor_id nu este integer valid
+
+Exemplu cerere:
+  GET /schedule/professor/3
+
+Exemplu raspuns (200 OK):
+  [
+    {
+      "id": 1,
+      "course_name": "Algoritmi",
+      "professor_id": 3,
+      "room": "A101",
+      "day": "Luni",
+      "start_time": "08:00",
+      "end_time": "10:00"
+    },
+    {
+      "id": 4,
+      "course_name": "Structuri de Date",
+      "professor_id": 3,
+      "room": "B202",
+      "day": "Miercuri",
+      "start_time": "12:00",
+      "end_time": "14:00"
+    }
+  ]
+
+Exemplu raspuns pentru profesor fara sloturi (200 OK):
+  []
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. GET /schedule/professor/{id} returneaza lista tuturor sloturilor profesorului
+2. Daca profesorul nu are sloturi, returneaza lista goala [] cu status 200
+3. Rezultatele nu sunt limitate de paginare (returneaza toate sloturile)
+4. Endpoint-ul este definit INAINTEA rutei /{slot_id} pentru a evita
+   conflictul de rutare in FastAPI
+5. Raspunsul respecta schema ScheduleResponse
+
+
+----------------
+24 Mai 2026
+Implementat in features/endpoints

@@ -1,0 +1,32 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA: Actualizare Status Înscriere
+================================================================================
+
+TITLU:
+------
+Adăugare endpoint nou pentru modificarea stării unei înscrieri (PUT /enrollments/{enrollment_id}/status).
+
+DESCRIERE:
+----------
+Acest endpoint va permite modificarea stării unei înscrieri existente (de exemplu, trecerea unui student de pe lista de așteptare 'waitlist' în starea de înscris activ 'enrolled', sau invers). Funcționalitatea ajută la managementul fluxului de studenți pe locurile disponibile la cursuri.
+
+MODULE AFECTATE:
+----------------
+Modul Enrollments:
+  - app/schemas.py: Crearea unui nou model Pydantic pentru request-ul de update.
+  - app/service.py: Adăugarea funcției de modificare a statusului în enrollments_db.
+  - app/router.py: Expunerea noului endpoint HTTP PUT.
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint Nou:
+  - Metoda: PUT
+  - URL: /enrollments/{enrollment_id}/status
+  - Parametri: status (str, în body-ul cererii)
+  - Răspuns: 200 OK cu obiectul EnrollmentResponse modificat, 404 Not Found dacă ID-ul înscrierii nu există, 422 dacă statusul trimis este invalid.
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Endpoint-ul trebuie să modifice cu succes câmpul "status" în dicționarul din memorie pentru ID-ul trimis.
+2. Trebuie să accepte doar valori de status predefinite (ex: "enrolled", "waitlist").
+3. Dacă enrollment_id nu este găsit în sistem, trebuie să returneze codul HTTP 404 cu mesajul "Enrollment not found".

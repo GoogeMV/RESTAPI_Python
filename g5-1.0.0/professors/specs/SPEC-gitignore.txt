@@ -1,0 +1,79 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare fisier .gitignore pentru proiect Python/FastAPI
+
+
+
+
+DESCRIERE:
+----------
+Repository-ul nu contine in prezent un fisier .gitignore. In consecinta, la
+rularea aplicatiei local, Python genereaza fisiere bytecode (__pycache__/,
+*.pyc) care apar ca fisiere untracked in `git status` pentru toti
+colaboratorii. Exista riscul ca un coleg sa execute `git add .` din neatentie
+si sa includa in repository fisiere care nu trebuie versionate (bytecode,
+medii virtuale, fisiere de configurare IDE, fisiere .env cu secrete, cache-uri
+de la pytest/mypy/ruff, log-uri locale).
+
+Aceasta functionalitate adauga un fisier .gitignore standard pentru proiecte
+Python, bazat pe template-ul oficial GitHub Python.gitignore, completat cu
+exclusii pentru IDE-uri (VSCode, PyCharm) si fisiere specifice sistemelor
+de operare (macOS, Windows).
+
+Beneficii:
+- `git status` afiseaza doar fisierele relevante
+- Imposibil sa se faca commit accidental la bytecode sau secrete
+- Configuratiile locale ale fiecarui dezvoltator (IDE, mediu virtual)
+  raman pe masina lui, nu polueaza repo-ul comun
+
+
+
+
+MODULE AFECTATE:
+----------------
+Aceasta modificare nu afecteaza niciun modul al aplicatiei. Nu se modifica
+cod sursa, nu se modifica functionalitatea API-ului, nu se modifica
+dependentele.
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Nu se adauga si nu se modifica niciun endpoint. Modificarea este strict la
+nivel de tooling/configurare repository.
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Fisierul .gitignore exista in radacina repository-ului dupa merge.
+
+2. La rularea `git status` pe un repo curat, dupa pornirea aplicatiei
+   cu uvicorn niciun fisier __pycache__/ sau *.pyc nu apare ca untracked.
+
+3. Comanda `git status --ignored` confirma ca urmatoarele categorii sunt
+   ignorate: bytecode Python, medii virtuale (venv/, .venv/), fisiere .env,
+   foldere IDE (.vscode/, .idea/), cache-uri (.pytest_cache/, .mypy_cache/,
+   .ruff_cache/), fisiere de log (*.log).
+
+4. Fisiere care TREBUIE sa ramana versionate NU sunt ignorate accidental:
+   - .gitlab-ci.yml (pipeline partajat)
+   - requirements.txt (dependente partajate)
+   - openapi.json (livrabil al fiecarui modul, conform cerintei #6)
+   - SPEC.txt (specificatii)
+   - Cod sursa al modulelor (router.py, service.py, schemas.py, data.py)
+   - Teste (tests/test_router.py)
+   - Documentatie (README.md)
+
+5. Pipeline-ul CI/CD ruleaza fara erori dupa merge (jobs lint si test trec
+   sau au comportamentul asteptat conform .gitlab-ci.yml).
+
+6. Fisierul .gitignore foloseste template-ul oficial GitHub Python.gitignore
+   ca baza, completat cu exclusii pentru IDE-uri si fisiere de sistem
+   (.DS_Store, Thumbs.db, .vscode/, .idea/).

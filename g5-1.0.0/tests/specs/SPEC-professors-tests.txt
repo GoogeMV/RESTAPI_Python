@@ -1,0 +1,88 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare teste unitare pentru modulul professors
+
+
+
+
+DESCRIERE:
+----------
+Modulul professors nu are in prezent niciun test unitar scris. Aceasta
+specificatie propune adaugarea unei suite de teste care sa acopere
+comportamentul endpoint-urilor CRUD (create, read, update, delete),
+inclusiv validarile aplicate pe schemele Pydantic si regulile de business
+de la nivelul service-ului.
+
+
+
+MODULE AFECTATE:
+----------------
+Modul professors:
+  Modificari:
+    - Adaugare folder professors/tests/ cu __init__.py
+    - Adaugare fisier professors/tests/test_router.py cu suita de teste
+    - Adaugare folder professors/specs pentru a stoca fisierele SPEC construite in timpul
+      dezvoltarii modulului professors, pentru a crea un istoric
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Niciun endpoint nu este adaugat sau modificat. Testele verifica
+endpoint-urile existente:
+- POST /professors/
+- GET /professors/
+- GET /professors/{id}
+- PUT /professors/{id}
+- DELETE /professors/{id}
+
+Endpoint-ul GET /professors/{id}/courses (depinde de modulul enrollments)
+este lasat deliberat in afara acestei suite si va fi acoperit ulterior,
+intr-un MR separat.
+
+
+
+ACOPERIRE TESTE:
+----------------
+Suita de teste acopera urmatoarele categorii de comportament:
+
+CRUD de baza:
+- POST creeaza profesor si returneaza 201 cu datele corecte
+- POST atribuie ID-uri incrementale incepand de la 1
+- GET pe lista returneaza 200 si lista goala initial
+- GET pe id existent returneaza 200 si datele profesorului
+- GET pe id inexistent returneaza 404
+- PUT modifica doar campurile trimise (update partial)
+- PUT pe id inexistent returneaza 404
+- DELETE sterge profesorul si confirma prin GET ulterior
+- DELETE pe id inexistent returneaza 404
+
+Validari pe scheme Pydantic (returneaza 422):
+- email cu format invalid
+- name mai scurt de 2 caractere sau format doar din spatii
+- name mai lung de 100 de caractere
+- department mai scurt de 2 caractere
+- camp necunoscut in payload (extra=forbid)
+- aceleasi validari aplicate si pe PUT pentru campurile trimise
+
+Comportament de normalizare:
+- spatiile de la inceput si sfarsit ale name-ului sunt eliminate
+- spatiile de la inceput si sfarsit ale department-ului sunt eliminate
+
+Reguli de unicitate la nivel de service (returneaza 409):
+- POST cu email deja existent
+- PUT cu email folosit de alt profesor
+
+Cazuri pozitive aferente unicitatii:
+- PUT cu propriul email curent al profesorului (nu este conflict)
+- POST cu un email refolosit dupa stergerea profesorului care il avea
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Folderul professors/tests/ exista si contine __init__.py si test_router.py.
+2. Toate testele trec local cu comanda: pytest professors/tests/ -v

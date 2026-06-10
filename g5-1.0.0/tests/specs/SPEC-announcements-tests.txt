@@ -1,0 +1,67 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare teste unitare pentru modulul announcements
+
+
+
+
+DESCRIERE:
+----------
+Modulul announcements are in prezent doar un test simplu care verifica daca
+endpoint-ul de listare este incarcat corect. Aceasta specificatie propune
+adaugarea unei suite de teste de baza care sa acopere comportamentul actual
+al endpoint-urilor modulului announcements.
+
+Testele vor verifica operatiile CRUD (create, read, update, delete), filtrarea
+dupa audienta si cazurile de eroare de baza, fara modificarea comportamentului
+existent al endpoint-urilor.
+
+
+
+
+MODULE AFECTATE:
+----------------
+Modul announcements:
+  Modificari:
+    - Adaugare sau completare fisier tests/test_router_announcements.py
+    - Adaugare teste pentru listarea anunturilor
+    - Adaugare teste pentru crearea anunturilor
+    - Adaugare teste pentru citirea unui anunt dupa id
+    - Adaugare teste pentru filtrarea anunturilor dupa audienta
+    - Adaugare teste pentru modificarea anunturilor
+    - Adaugare teste pentru stergerea anunturilor
+    - Resetarea bazei de date in memorie inainte de fiecare test
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Niciun endpoint nu este adaugat sau modificat. Testele verifica
+endpoint-urile existente:
+- POST /announcements/
+- GET /announcements/
+- GET /announcements/audience/{audience}
+- GET /announcements/{ann_id}
+- PUT /announcements/{ann_id}
+- DELETE /announcements/{ann_id}
+
+Nu se modifica structura raspunsurilor si nu se adauga validari noi in aceasta
+etapa. Testele reflecta comportamentul actual al codului.
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. Fisierul tests/test_router_announcements.py exista.
+2. Testele folosesc TestClient pentru a verifica endpoint-urile modulului.
+3. Baza de date in memorie a modulului announcements este resetata inainte de fiecare test.
+4. Exista teste pentru create, read, update si delete.
+5. Exista test pentru filtrarea anunturilor dupa audienta.
+6. Exista teste pentru cazurile de eroare de baza, cum ar fi id inexistent.
+7. Toate testele trec local cu comanda: pytest tests/test_router_announcements.py -v

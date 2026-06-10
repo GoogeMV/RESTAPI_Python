@@ -1,0 +1,255 @@
+================================================================================
+MINUTA - SAPTAMANA 1 -> 2
+================================================================================
+
+SUMAR GENERAL
+-------------
+Activitatea s-a concentrat pe doua directii: (1) adaugarea validarilor
+Pydantic pe schemele de intrare, ca raspuns la cerinta 2 din README,
+si (2) extinderea suitelor de teste pentru modulele individuale.
+Sase module au inregistrat activitate vizibila in aceasta perioada.
+
+
+
+ACTIVITATI PE MODULE
+--------------------
+
+professors (Alexandru-Marian Lupu)
+  Realizat:
+    - Adaugare validari Pydantic pe schemele ProfessorCreate si
+      ProfessorUpdate: EmailStr, Field cu min_length si max_length pe
+      name si department, field_validator pentru eliminarea
+      whitespace-ului, ConfigDict extra="forbid".
+    - Regula de unicitate a email-ului la nivelul service-ului,
+      cu raspuns 409 Conflict la creare si la actualizare.
+    - Extindere suita de teste cu cazuri pentru validari si conflicte.
+    - Actualizare README si SPEC pentru testele de modul.
+  In curs / urmatorii pasi:
+    - Inca neinceput: paginare si filtrare pe lista de profesori,
+      endpoint nou pentru integrarea cu modulul enrollments.
+
+
+announcements (Vladut-Cristian Nicolae)
+  Realizat:
+    - Suita extinsa de teste pentru endpoint-urile /announcements,
+      insotita de SPEC-announcements-tests.
+    - Adaugare validari Pydantic pe scheme si modificare SPEC pentru
+      a reflecta schimbarile, plus ajustari pentru flake8.
+  In curs / urmatorii pasi:
+    - Neraportate explicit in aceasta sedinta.
+
+
+grades (Rares Andrei Stefan Vararu)
+  Realizat:
+    - SPEC pentru un endpoint nou care afiseaza top N studenti
+      ordonati dupa media notelor.
+    - Implementarea endpoint-ului, plus paginare adaugata pe
+      functia de listare get_all_grades / list_grades.
+  Probleme intampinate:
+    - Pipeline-ul a esuat la primul push (testele nu treceau).
+      Cauza: folosirea Query() in loc de Path() pentru parametrul
+      din ruta /top/{n}. Rezolvat printr-un commit ulterior.
+  In curs / urmatorii pasi:
+    - Neraportate explicit in aceasta sedinta.
+
+
+materials (Ioana Ghioca)
+  Realizat:
+    - Validari pe scheme si actualizare documentatie modul.
+  In curs / urmatorii pasi:
+    - Neraportate explicit in aceasta sedinta.
+
+
+auth (Alexandru-Florentin Ion)
+  Realizat:
+    - Validari Pydantic pe username, password si role.
+    - Tratament pentru username duplicat la register, cu raspuns
+      409 Conflict.
+    - Actualizare teste pentru cazul de duplicat.
+    - Actualizare documentatie auth.
+  In curs / urmatorii pasi:
+    - Neraportate explicit in aceasta sedinta.
+
+
+enrollments (George Stan)
+  Realizat:
+    - Niciun MR finalizat in aceasta saptamana.
+  In curs / urmatorii pasi:
+    - Issue deschis: implementare paginare (limit, offset cu
+      valori implicite 10 si 0) si filtrare multicriteriala
+      dupa student_id, professor_id si course_name pentru
+      endpoint-ul GET /enrollments/.
+
+
+
+PROBLEME DE REZOLVAT
+--------------------
+- Coordonare pe modulele cu dependente cross-module: in special
+  professors -> enrollments si reports -> professors, unde
+  schimbarile unei parti o pot afecta pe cealalta.
+
+
+
+
+
+================================================================================
+MINUTA - SAPTAMANA 2 -> 3
+================================================================================
+
+--------------------------------------------------------------------------------
+SEDINTA 15-05-2026
+--------------------------------------------------------------------------------
+
+SUMAR
+-----
+Sedinta tehnica dedicata uniformizarii procesului de linting si formatare
+in proiect, precum si clarificarii modului de lucru pe endpoint-uri care
+folosesc date din alte module.
+
+MIGRARE FLAKE8 -> RUFF SI PRE-COMMIT
+------------------------------------
+  Context:
+    - Pipeline-ul a esuat repetat in ultimele saptamani pe warning-uri
+      triviale de stil PEP 8 (trailing whitespace, linii goale lipsa
+      sau in plus, line endings CRLF, lipsa newline final etc.) in
+      module diferite: auth, professors, schedule, students.
+    - flake8 doar raporta problemele, fara sa le poata repara automat,
+      ceea ce ducea la fix-uri manuale repetate si pipeline-uri picate
+      pe motive minore.
+
+  Decizie:
+    - Inlocuirea flake8 cu ruff (linter + formatter modern, mult mai
+      rapid, capabil sa repare automat majoritatea problemelor de stil).
+    - Introducerea pre-commit cu hook-uri ruff, astfel incat formatarea
+      sa fie aplicata automat la fiecare commit local.
+
+  Realizat in sedinta:
+    - Prezentare a ceea ce este ruff si pre-commit si a motivelor
+      tehnice pentru aceasta migrare.
+    - Demonstratie de instalare si configurare pas cu pas.
+    - Reparare completa a problemelor de linter existente in codebase
+      (formatare globala cu ruff, plus 3 fix-uri manuale pentru
+      probleme pe care ruff nu le poate repara automat: 2x E741
+      "ambiguous variable name 'l'" in library si reports, plus 1x
+      E402 "module level import not at top of file" in main.py).
+    - Adaugare fisiere de configurare in repo: pyproject.toml,
+      .gitattributes (pentru a forta line endings LF pe fisierele
+      Python), .pre-commit-config.yaml.
+    - Actualizare .gitlab-ci.yml: cele 10 invocari per-modul de
+      flake8 au fost inlocuite cu doua comenzi globale,
+      ruff check . si ruff format --check ..
+
+  Pasi pentru fiecare student:
+    - Dupa pull pe main, fiecare membru al echipei trebuie sa ruleze
+      o singura data, local, comanda "pre-commit install", pentru ca
+      hook-urile sa devina active in propria clona a repo-ului.
+    - Instructiunile au fost adaugate si in README.
+
+COORDONARE PE ENDPOINT-URI CROSS-MODULE
+---------------------------------------
+  Decizie:
+    - Pentru endpoint-uri care folosesc date din alte module, studentul
+      care implementeaza endpoint-ul discuta direct, in privat, cu
+      studentul care detine modulul respectiv (formatul exact al
+      datelor, contractul, eventualele schimbari necesare).
+    - Nu este necesara o sedinta dedicata pentru fiecare astfel
+      de coordonare. Daca apar blocaje sau dezacorduri care nu se pot
+      rezolva intre cei doi, atunci se aduc in sedinta saptamanala.
+
+
+SUMAR GENERAL
+-------------
+Saptamana a fost dedicata implementarii cerintelor 3 si 4 din README
+(paginare/filtrare si endpoint nou cu dependente cross-module).
+Cinci module au raportat activitate concreta in aceasta perioada.
+Restul colegilor nu au transmis un raport pentru aceasta minuta.
+
+
+
+ACTIVITATI PE MODULE
+--------------------
+
+Modul: professors (Alexandru-Marian Lupu)
+  Realizat:
+    - Paginare si filtrare pe endpoint-urile de listare:
+      parametri limit si offset (default 10, max 100, validare
+      stricta cu Query) pe GET /professors/ si pe
+      GET /professors/{id}/courses; filtre substring case-insensitive
+      pe name, department si email pentru GET /professors/.
+    - Endpoint nou GET /professors/{id}/students, care expune relatia
+      indirecta profesor-student prin tabela enrollments. Studentii
+      apar deduplicati (un student inscris la mai multe cursuri ale
+      aceluiasi profesor apare o singura data), sortati dupa id pentru
+      paginare, cu detalii complete preluate din modulul
+      students. Daca un modul lipseste la runtime, se trimite un raspuns
+      503 Service Unavailable.
+    - Suita de teste a fost extinsa cu cazuri pentru paginare (valori
+      valide, offset peste total, parametri invalizi cu 422),
+      filtrare (per camp, case-insensitive, combinatii AND) si pentru
+      noul endpoint /students (deduplicare, lista goala, 404, 
+      paginare, 422).
+    - SPEC.txt a fost completat pentru endpoint-ul /students inainte de
+      implementare, conform Fluxului 1 din README-ul de proiect.
+    - Actualizare README-ul modulului cu noua dependenta de students,
+      cu noile endpoint-uri si comportamentul cross-modul.
+
+
+Modul: grades (Rares Andrei Stefan Vararu)
+  Realizat:
+    - Endpoint nou pentru statisticile studentilor la un curs anume.
+  In curs / urmatorii pasi:
+    - Adaugare teste pentru functionalitatile modulului.
+
+
+Modul: enrollments (George Stan)
+  Realizat:
+    - SPEC + Merge Request pentru endpoint nou de schimbare a
+      statusului unei inscrieri ("enrolled" / "waitlist").
+    - Cleanup de spatii goale si adaugare newline final in fisierele
+      modulului, atat pe lucrul din aceasta saptamana cat si retroactiv
+      pe codul saptamanilor anterioare.
+  In curs / urmatorii pasi:
+    - Adaugare teste.
+
+
+Modul: materials (Ioana Ghioca)
+  Realizat:
+    - Functionalitate de paginare adaugata pe endpoint-urile existente.
+    - Endpoint nou de cautare dupa cuvant cheie in campurile
+      course_name, title si content.
+    - Actualizare README si SPEC pentru modulul materials, Merge
+      Request finalizat.
+  In curs / urmatorii pasi:
+    - Adaugare unul sau mai multe endpoint-uri noi, cu SPEC dedicat
+      pentru review de echipa.
+
+Modul: library (Petrea Irina Florentina)
+
+Rezolvat:
+Am creat un mediu virtual .venv si am instalat dependentele proiectului
+Am configurat email-ul Git pentru repository cu adresa facultatii
+Am sincronizat branch-ul local cu modificarile echipei (migrare flake8 la ruff)
+Am scris 7 teste unitare pentru modulul library (adaugare carte, listare, imprumut, imprumut indisponibil, returnare, returnare dubla, disponibilitate)
+Am adaugat validari Pydantic pe scheme: titlu si autor minim 2 caractere, ISBN intre 10-13 caractere, numar copii minim 1, ID-uri pozitive
+Am adaugat paginare (limit/offset) si filtrare dupa autor la endpoint-ul GET /library/books
+Am adaugat filtrare dupa student_id la endpoint-ul GET /library/loans
+Am creat issue pe GitLab, am discutat cu echipa si am deschis Merge Request pentru review
+
+In lucru :
+Crearea unui endpoint nou.
+
+restul modulelor (announcements, auth, students, schedule, reports)
+  Realizat:
+    - Niciun raport transmis pentru aceasta minuta.
+
+
+
+PROBLEME DE REZOLVAT
+--------------------
+- Cinci din noua colegi au transmis un raport pentru aceasta minuta.
+  Restul nu au raspuns. Pentru sedinta urmatoare
+  se va stabili un termen-limita explicit pentru raportare.
+
+- Observatie: De vina este si maintainer-ul Lupu Alexandru-Marian ca
+  a anuntat tarziu ca fiecare coleg trebuie sa isi scrie sectiunea 
+  pentru raportul Minuta.

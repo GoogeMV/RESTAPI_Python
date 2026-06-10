@@ -1,0 +1,104 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Endpoint pentru calculul mediei generale (GPA) a unui student
+
+
+
+
+DESCRIERE:
+----------
+Acest endpoint extinde functionalitatea modulului students prin expunerea
+unei operatii de agregare a datelor academice: calculul mediei generale
+(GPA) pentru un student.
+
+Endpoint-ul GET /students/{id}/gpa returneaza media notelor studentului
+pe baza datelor stocate in modulul grades.
+
+In arhitectura curenta, notele sunt gestionate separat in modulul grades,
+iar relatia student-nota este realizata prin campul student_id din fiecare
+inregistrare de tip grade.
+
+
+
+
+MODULE AFECTATE:
+----------------
+
+Modulul 1: students
+  Modificari:
+    - service.py: implementare functie get_student_gpa(student_id)
+      care colecteaza toate notele din grades.app.data.grades_db,
+      filtreaza dupa student_id si calculeaza media aritmetica.
+      In cazul in care nu exista note, se returneaza GPA = 0.
+      Importul modulului grades este realizat lazy (in interiorul functiei)
+      pentru a evita dependente circulare.
+
+    - router.py: endpoint nou GET /{id}/gpa care verifica existenta
+      studentului si apeleaza service-ul. Daca studentul nu exista,
+      se returneaza 404.
+
+
+
+
+Modulul 2: grades
+  Modificari:
+    - Niciuna. Modulul este consumat read-only prin grades_db.
+      Se presupune existenta campurilor:
+      id, student_id, value (nota numerica intre 1 si 10).
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+
+Endpoint:
+  Metoda: GET
+  URL: /students/{student_id}/gpa
+
+  Parametri:
+    - student_id (path, int, obligatoriu)
+
+  Raspuns:
+    - 200 OK:
+      {
+        "student_id": 1,
+        "gpa": 8.75
+      }
+
+    - 404 Not Found:
+      Studentul nu exista in students_db
+
+    - 200 OK (caz special):
+      Daca studentul exista dar nu are note,
+      se returneaza gpa = 0
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+
+1. Endpoint-ul returneaza media corecta a notelor din grades.
+
+2. Daca studentul are mai multe note, acestea sunt incluse toate
+   in calculul mediei.
+
+3. Daca studentul nu are note, GPA returnat este 0 si nu apare eroare.
+
+4. Daca studentul nu exista, endpoint-ul returneaza 404.
+
+5. Modulul grades este accesat doar prin import lazy in service.py.
+
+6. Endpoint-ul este acoperit de teste unitare:
+   - student cu note
+   - student fara note
+   - student inexistent
+
+7. Endpoint-ul nu modifica datele din grades sau students (read-only).
+
+8. Pipeline-ul CI/CD trebuie sa ramana verde dupa implementare.

@@ -1,0 +1,83 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE EXISTENTA EXTINSA
+================================================================================
+
+TITLU:
+------
+Adaugare filtrare si paginare pentru lista de studenti
+
+
+
+
+DESCRIERE:
+----------
+Endpoint-ul GET /students/ este extins cu functionalitati de filtrare
+si paginare pentru a permite scalabilitate si cautare eficienta in lista
+de studenti.
+
+Filtrarea se realizeaza dupa nume, iar paginarea se face prin parametrii
+limit si offset.
+
+
+
+
+MODULE AFECTATE:
+----------------
+
+Modulul 1: students
+  Modificari:
+    - router.py: adaugare parametri query:
+        name (optional)
+        limit (default 10, intre 1 si 100)
+        offset (default 0, minim 0)
+
+    - service.py:
+        implementare logica de filtrare substring case-insensitive
+        implementare paginare dupa filtrare
+        ordinea operatiilor: filtrare → paginare
+
+Modulul 2: restul modulelor
+  - Niciun impact direct
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+
+Endpoint:
+  GET /students/
+
+  Query params:
+    - name (optional string)
+    - limit (int, default 10, 1–100)
+    - offset (int, default 0, >=0)
+
+  Comportament:
+    - filtrare case-insensitive pe nume
+    - substring match
+    - AND logic (daca se adauga mai multe filtre in viitor)
+    - paginare aplicata dupa filtrare
+
+  Raspuns:
+    - 200 OK cu lista (posibil goala)
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+
+1. Filtrarea functioneaza corect pentru substring (ex: "ion" → "Ion Popescu").
+
+2. Filtrarea este case-insensitive.
+
+3. Paginarea returneaza corect subsetul de date.
+
+4. offset mai mare decat numarul de rezultate returneaza lista goala.
+
+5. limit si offset sunt validate de FastAPI (422 automat).
+
+6. Ordinea rezultatelor este stabila intre apeluri.
+
+7. Endpoint-ul nu modifica datele, doar le citeste.

@@ -1,0 +1,48 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Export complet statistici rapoarte
+
+
+DESCRIERE:
+----------
+Adauga un endpoint care returneaza toate statisticile disponibile
+intr-un singur apel JSON. Util pentru dashboard-uri si integrari externe
+care au nevoie de o imagine completa a sistemului universitar dintr-o
+singura cerere HTTP.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: reports
+  Modificari: Adaugare endpoint GET /reports/export in app/router.py
+              care apeleaza toate functiile existente din service.py
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /reports/export
+  Parametri: niciunul
+  Raspuns: JSON cu cheile: enrollment_stats, grade_distribution,
+           student_count, professor_count, library_stats
+
+Endpoint 2:
+  Metoda: GET
+  URL: /reports/grade-distribution
+  Parametri: min_avg (float, optional) — filtreaza cursurile cu media sub valoarea data
+  Raspuns: { "NumeCurs": medie_float }
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. GET /reports/export returneaza HTTP 200 cu toate cele 5 sectiuni de statistici
+2. Daca un modul dependent lipseste, sectiunea corespunzatoare returneaza
+   valoare goala (nu crapa aplicatia)
+3. GET /reports/grade-distribution?min_avg=X filtreaza corect cursurile
+4. Raspunsul este un JSON valid cu structura documentata
+5. Toate testele din tests/test_router.py trec cu pytest

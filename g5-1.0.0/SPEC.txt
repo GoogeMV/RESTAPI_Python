@@ -1,0 +1,63 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+[Scrieti un titlu scurt si descriptiv pentru functionalitatea propusa]
+
+
+
+
+DESCRIERE:
+----------
+[Descrieti functionalitatea dorita. Ce trebuie sa faca? Ce problema rezolva?
+Ce comportament nou adauga aplicatiei?]
+
+
+
+
+MODULE AFECTATE:
+----------------
+[Listati modulele care trebuie modificate sau care sunt afectate de aceasta
+functionalitate. Explicati ce modificari sunt necesare in fiecare modul.]
+
+Modul 1: 
+  Modificari: 
+
+Modul 2: 
+  Modificari: 
+
+
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+[Listati endpoint-urile noi care trebuie create sau endpoint-urile existente
+care trebuie modificate. Includeti metoda HTTP, URL-ul, parametrii si
+formatul raspunsului.]
+
+Endpoint 1:
+  Metoda: 
+  URL: 
+  Parametri: 
+  Raspuns: 
+
+Endpoint 2:
+  Metoda: 
+  URL: 
+  Parametri: 
+  Raspuns: 
+
+
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+[Listati conditiile care trebuie indeplinite pentru ca functionalitatea sa fie
+considerata completa. Includeti cazuri de test, validari si comportamente
+asteptate.]
+
+1. 
+2. 
+3. 

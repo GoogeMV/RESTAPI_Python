@@ -1,0 +1,92 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+Health Check API – verificare rulare aplicatie (ping endpoint)
+
+DESCRIERE:
+
+Se defineste un endpoint global de health check care confirma ca aplicatia ruleaza si este capabila sa raspunda la request-uri HTTP.
+
+Acest endpoint este folosit in:
+
+1. CI/CD (verificare ca serverul pornește corect)
+2. monitorizare sistem
+3. validare deploy-uri
+
+Functionalitatea nu depinde de baza de date sau alte servicii externe.
+
+MODULE AFECTATE:
+
+Modul 1: app/main.py (sau entrypoint-ul aplicatiei)
+
+1. Adaugare endpoint /ping
+2. Returnare raspuns simplu de tip JSON
+3. Fara dependente externe
+
+Modul 2: tests/contract/
+
+Adaugare test pentru verificarea endpoint-ului de health check
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+
+Endpoint 1:
+Metoda: GET
+URL: /ping
+Parametri: niciunul
+
+Raspuns:
+
+200 OK
+{
+  "message": "pong"
+}
+
+CRITERII DE ACCEPTARE:
+
+1. Endpoint-ul /ping returneaza status code 200
+2. Raspunsul este JSON valid
+3. Raspunsul contine exact campul message cu valoarea "pong"
+4. Endpoint-ul functioneaza fara dependinte externe (DB, auth, etc.)
+5. Testul automat trebuie sa confirme comportamentul endpoint-ului
+
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+
+Adaugare pachetul pytest.
+
+DESCRIERE:
+
+Instalare pachet pentru testarea aplicatiei de catre ci/cd cat si individual.
+
+MODULE AFECTATE:
+
+Intreg proiectul.
+
+CRITERII DE ACCEPTARE:
+
+1. Pachetul este prezent in fisierul requirements.txt
+
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+
+Adaugare pachetul httpx.
+
+DESCRIERE:
+
+Instalare pachet necesar pentru a rula si folosi pytest.
+
+MODULE AFECTATE:
+
+Intreg proiectul.
+
+CRITERII DE ACCEPTARE:
+
+1. Pachetul este prezent in fisierul requirements.txt

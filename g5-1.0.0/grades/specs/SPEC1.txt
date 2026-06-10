@@ -1,0 +1,21 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare limite valori din schemas
+
+
+
+DESCRIERE:
+----------
+Modificarea valorilor pentru asigurarea respectarii limitelor respective fiecarei valori astfel incat sa nu se lucreze cu valori eronate, de asemenea sa nu trebuiasca verificate la fiecare utilizare a acestora.
+
+
+
+MODULE AFECTATE:
+----------------
+
+Modul 1: 
+  grades (shchemas.py): modificarea valorilor pentru asigurarea respectarii limitelor respective fiecarei valori. 

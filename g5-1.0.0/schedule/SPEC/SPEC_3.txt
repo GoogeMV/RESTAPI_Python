@@ -1,0 +1,42 @@
+================================================================================
+SPECIFICATIE FUNCTIONALITATE NOUA
+================================================================================
+
+TITLU:
+------
+Adaugare filtrare si paginare - modul schedule
+
+
+DESCRIERE:
+----------
+Adaugarea de parametri de filtrare si paginare la endpoint-ul de listare
+al modulului schedule. Utilizatorii pot acum filtra sloturile dupa zi,
+profesor sau sala, si pot pagina rezultatele.
+
+
+MODULE AFECTATE:
+----------------
+Modul 1: schedule
+  Modificari: router.py - adaugare parametri Query la GET /schedule/
+              service.py - adaugare logica de filtrare si paginare
+
+
+ENDPOINT-URI NOI SAU MODIFICATE:
+---------------------------------
+Endpoint 1:
+  Metoda: GET
+  URL: /schedule/
+  Parametri: day (optional), professor_id (optional), room (optional),
+             limit (default 10, max 100), offset (default 0)
+  Raspuns: lista paginata si filtrata de sloturi
+
+
+CRITERII DE ACCEPTARE:
+----------------------
+1. GET /schedule/?day=Luni returneaza doar sloturile de luni
+2. GET /schedule/?professor_id=3 returneaza doar sloturile profesorului 3
+3. GET /schedule/?room=A101 returneaza doar sloturile din sala A101
+4. Filtrele pot fi combinate (ex: ?day=Luni&room=A101)
+5. ?limit=5&offset=0 returneaza primele 5 rezultate
+6. ?limit=5&offset=5 returneaza urmatoarele 5 rezultate
+7. limit accepta valori intre 1 si 100, offset minim 0
